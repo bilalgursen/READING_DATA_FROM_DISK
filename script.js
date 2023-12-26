@@ -6,113 +6,87 @@
 // $$ |  $$ |$$ |\$$\  $$ |  $$ |      $$ |      $$ |$$   ____|$$  _$$<    $$ |$$\ $$ |      $$ |  $$ |$$ |  $$ |$$ |$$  _$$<
 // $$$$$$$  | $$$$ $$\ $$ |  $$ |      $$$$$$$$\ $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |$$ |      \$$$$$$  |$$ |  $$ |$$ |$$ | \$$\
 // \_______/  \____\__|\__|  \__|      \________|\__| \_______|\__|  \__|   \____/ \__|       \______/ \__|  \__|\__|\__|  \__|
-
-const { Console } = require("console");
+const axios = require("axios");
 const fs = require("fs");
 const readline = require("readline");
+const slugify = require("slugify");
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-console.log("\n");
-console.log("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+console.log("\n Klasör isimlerinin yazılmasını istediğiniz sürücü yolunu girin: ");
 
-rl.question(
-  "\n Klasör isimlerinin yazılmasını istediğiniz sürücü yolunu girin: ",
-  function (surucu) {
-    fs.access(surucu, fs.constants.R_OK, function (error) {
+rl.question("Sürücü yolu: ", async function (surucu) {
+  fs.access(surucu, fs.constants.R_OK, async function (error) {
+    if (error) {
+      console.error("Girdiğiniz sürücü yolu geçersiz veya mevcut değil. Lütfen tekrar deneyin.");
+      rl.close();
+      return;
+    }
+
+    fs.readdir(surucu, { withFileTypes: true }, async function (error, files) {
       if (error) {
-        console.error(
-          "Girdiğiniz sürücü yolu geçersiz veya mevcut değil. Lütfen tekrar deneyin. CTRL+D Yapıp Programdan Çıkmalısınız."
-        );
-        return 0;
+        console.error(error.message);
+        console.error("Programdan çıkılıyor...");
+        rl.close();
+        return;
       }
 
-      fs.readdir(surucu, { withFileTypes: true }, function (error, files) {
-        if (error) {
-          console.error(error.message);
-          console.error(" CTRL+D Yapıp Programdan Çıkmalısınız.");
-          return;
-        }
+      let games = files
+        .filter((file) => file.isFile() && file.name.endsWith(".pkg"))
+        .map((file) => file.name);
 
-        let games = files
-          .filter((file) => file.isFile() && file.name.endsWith(".pkg"))
-          .map((file) => file.name);
-
-        if (games.length === 0) {
-          console.error(
-            "Taranan sürücüde oyun bulunamadı. CTRL+D Yapıp Programdan Çıkmalısınız."
-          );
-          return;
-        }
-
-        let groupedGames = groupAndNumberGames(games);
-
-        let metin = groupedGames
-          .map(
-            (group, index) =>
-              `${index + 1}- ${group.name} / ${surucu.replace(
-                /[:/]/g,
-                ""
-              )} (B&R Elektronik)`
-          )
-          .join("\n");
-
-        let dosya =
-          "C:\\Users\\OEM\\Desktop\\" +
-          surucu.replace(/[:/]/g, " ") +
-          "Oyunları.txt";
-
-        fs.writeFile(dosya, metin, function (error) {
-          if (error) {
-            console.error(error.message);
-            console.log("CTRL+D Yapıp Programdan Çıkmalısınız.");
-            return;
-          }
-          console.warn("Dosya Başarıyla Oluşturuldu oluşturdu.");
-          console.log("\n");
-          console.log(
-            "Her 6 satırda bir ayrılan paragraf öbeklerini yapayzekaya atıp prompt olarak da: "
-          );
-          console.log(
-            "--Bu oyunların internette resmini oyananış videosunu bul ve tablo oluştur anchor text ile linkleri tabloya göm tabloya bakıldığında oyun hakkında bilgi edinebilinsin kısaca oyunuda açıkla depolama alanınıda belirt bu tabloda"
-          );
-        });
-
+      if (games.length === 0) {
+        console.error("Taranan sürücüde oyun bulunamadı. Programdan çıkılıyor...");
         rl.close();
-      });
+        return;
+      }
+
+      console.log("B&R Elektronik tarafından oluşturulan yapay zekadan istek alınıyor. Lütfen bekleyin...");
+
+      let slugifiedGameNames = games
+        .map((game) => slugify(game.replace(".pkg", ""), { lower: true }))
+        .join(","); // Oyun isimlerini slug formatına çevir
+
+      // API'ye istek gönderme
+      const apiUrl = `https://api.gglvxd.eu.org/v1/chatgpt?q=Merhaba Sen br elektronikde çalışan bir yazılımcı rolündesin bu attığım listeyi ${encodeURIComponent(slugifiedGameNames)}Tablo halinde organize edip oyunların ismi türü ve kısa açıklaması olan markdown kodunu yaz.`;
+
+      try {
+        const response = await axios.get(apiUrl);
+        console.log("Yapay zeka sonucu oluşturdu. Sonuç dosyaya yazılıyor...");
+
+        // API'nin döndüğü chat verisini al
+        const chatResponse = response.data.chat;
+
+        // Sonucu bir dosyaya yaz
+        const dosya = "C:\\Users\\OEM\\Desktop\\apiSonucu.txt";
+        fs.writeFile(dosya, chatResponse, function (error) {
+          if (error) {
+            console.error("Dosyaya yazma hatası:", error.message);
+          } else {
+            console.log(`Sonuç dosyası oluşturuldu: ${dosya} b&r elektronik olarak iyi günler dileriz...`);
+          }
+        });
+      } catch (error) {
+        console.error("API isteği sırasında bir hata oluştu:", error.message);
+      }
+
+      rl.close();
     });
-  }
-);
-
-function groupAndNumberGames(games) {
-  let groupedGames = [];
-
-  games.forEach((game) => {
-    let groupName = getGroupName(game);
-    let existingGroup = groupedGames.find((group) => group.name === groupName);
-
-    if (existingGroup) {
-      existingGroup.count++;
-    } else {
-      groupedGames.push({ name: groupName, count: 1 });
-    }
   });
+});
 
-  groupedGames.forEach((group) => {
-    if (group.count > 1) {
-      group.name += `_${group.count}`;
-    }
-    delete group.count;
-  });
+// Kullanıcıya yükleniyor gibi bildirimler
+const loadingIndicator = ["   ", ".  ", ".. ", "..."];
+let loadingIndex = 0;
+const loadingInterval = setInterval(() => {
+  process.stdout.write("\r" + loadingIndicator[loadingIndex]);
+  loadingIndex = (loadingIndex + 1) % loadingIndicator.length;
+}, 10000);
 
-  return groupedGames;
-}
-
-function getGroupName(game) {
-  let parts = game.split(".");
-  parts.pop(); // Remove file extension
-  return parts.join(".");
-}
+// readline arayüzü kapatıldığında yükleniyor bildirimini temizle
+rl.on("close", () => {
+  clearInterval(loadingInterval);
+});
