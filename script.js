@@ -51,7 +51,7 @@ rl.question("Sürücü yolu: ", async function (surucu) {
         .join(","); // Oyun isimlerini slug formatına çevir
 
       // API'ye istek gönderme
-      const apiUrl = `https://api.gglvxd.eu.org/v1/chatgpt?q=Merhaba Sen br elektronikde çalışan bir yazılımcı rolündesin bu attığım listeyi ${encodeURIComponent(slugifiedGameNames)}Tablo halinde organize edip oyunların ismi türü ve kısa açıklaması olan markdown kodunu yaz.`;
+      const apiUrl = `https://api.gglvxd.eu.org/v1/chatgpt?q=Merhaba harika işler çıkardın şimdiki rolün br elektronik firmasında çalışan asistan bir yazılımcı rolündesin bu attığım listeyi ${encodeURIComponent(slugifiedGameNames)}Tablo halinde organize edip oyunların ismi türü ve kısa açıklaması olan markdown kodunu yaz.`;
 
       try {
         const response = await axios.get(apiUrl);
