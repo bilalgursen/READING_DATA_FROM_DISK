@@ -6,6 +6,7 @@
 // $$ |  $$ |$$ |\$$\  $$ |  $$ |      $$ |      $$ |$$   ____|$$  _$$<    $$ |$$\ $$ |      $$ |  $$ |$$ |  $$ |$$ |$$  _$$<
 // $$$$$$$  | $$$$ $$\ $$ |  $$ |      $$$$$$$$\ $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |$$ |      \$$$$$$  |$$ |  $$ |$$ |$$ | \$$\
 // \_______/  \____\__|\__|  \__|      \________|\__| \_______|\__|  \__|   \____/ \__|       \______/ \__|  \__|\__|\__|  \__|
+
 const axios = require("axios");
 const fs = require("fs");
 const readline = require("readline");
@@ -51,7 +52,8 @@ rl.question("Sürücü yolu: ", async function (surucu) {
         .join(","); // Oyun isimlerini slug formatına çevir
 
       // API'ye istek gönderme
-      const apiUrl = `https://api.gglvxd.eu.org/v1/chatgpt?q=Merhaba harika işler çıkardın şimdiki rolün br elektronik firmasında çalışan asistan bir yazılımcı rolündesin bu attığım listeyi ${encodeURIComponent(slugifiedGameNames)}Tablo halinde organize edip oyunların ismi türü ve kısa açıklaması olan markdown kodunu yaz.`;
+      const apiUrl = `https://api.gglvxd.eu.org/v3/chatgpt?q=Senin rolün yazılımcı bu attığım listeyi ${encodeURIComponent(slugifiedGameNames)}Tablo halinde organize edip ismi türü ve kısa açıklaması olan markdown kodunu yaz.`;
+      
 
       try {
         const response = await axios.get(apiUrl);
@@ -61,7 +63,7 @@ rl.question("Sürücü yolu: ", async function (surucu) {
         const chatResponse = response.data.chat;
 
         // Sonucu bir dosyaya yaz
-        const dosya = "C:\\Users\\OEM\\Desktop\\apiSonucu.txt";
+        const dosya = "C:\\Users\\OEM\\Desktop\\B&R_OYUN.txt";
         fs.writeFile(dosya, chatResponse, function (error) {
           if (error) {
             console.error("Dosyaya yazma hatası:", error.message);
