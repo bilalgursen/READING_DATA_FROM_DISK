@@ -52,7 +52,7 @@ rl.question("Sürücü yolu: ", async function (surucu) {
         .join(","); // Oyun isimlerini slug formatına çevir
 
       // API'ye istek gönderme
-      const apiUrl = `https://api.gglvxd.eu.org/v3/chatgpt?q=Senin rolün yazılımcı bu attığım listeyi ${encodeURIComponent(slugifiedGameNames)}Tablo halinde organize edip ismi türü ve kısa açıklaması olan markdown kodunu yaz.`;
+      const apiUrl = `https://api.gglvxd.eu.org/v3/chatgpt?q=Merhaba 1 den ${games.length} bu listeyi Liste="${encodeURIComponent(slugifiedGameNames)}" id ismi türü ve kısa açıklaması olan json formatında  derle ve çıktısını yaz.`;
       
 
       try {
@@ -86,7 +86,7 @@ let loadingIndex = 0;
 const loadingInterval = setInterval(() => {
   process.stdout.write("\r" + loadingIndicator[loadingIndex]);
   loadingIndex = (loadingIndex + 1) % loadingIndicator.length;
-}, 10000);
+}, 3000);
 
 // readline arayüzü kapatıldığında yükleniyor bildirimini temizle
 rl.on("close", () => {
